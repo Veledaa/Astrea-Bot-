@@ -11,6 +11,7 @@ class Pokemon(commands.Cog):
     @app_commands.command(name="pokemon", description="Mostra informações de Pokemons")
     async def pokemon(self, interaction:discord.Interaction, nome:str):
 
+
         url = f"https://pokeapi.co/api/v2/pokemon/{nome.lower()}"
 
 
@@ -18,12 +19,21 @@ class Pokemon(commands.Cog):
 
             resposta = await client.get(url)
 
-        if resposta.status_code != 200:
-            await interaction.response.send_message("Pokemon não encontrado. Verifique se escreveu corretamente.")
-        
-            return
+            if resposta.status_code != 200:
+                await interaction.response.send_message("Pokemon não encontrado. Verifique se escreveu corretamente.")
+            
+                return
 
-        dados = resposta.json()
+            dados = resposta.json()
+
+            
+
+            speciesUrl = dados["species"]["url"]
+            respostaSpecies = await client.get(speciesUrl)
+
+            dadosSpecies = respostaSpecies.json()
+
+            
 
 
         nomePokemon = dados["name"].title()
@@ -40,11 +50,52 @@ class Pokemon(commands.Cog):
 
         imagem = dados["sprites"]["front_default"]
 
-        embed = discord.Embed(
-            title=nomePokemon,
-            color=discord.Color.yellow()
+
+        geracoes = {
+            "generation-i": "1ª Geração (Kanto)",
+            "generation-ii": "2ª Geração (Johto)",
+            "generation-iii": "3ª Geração (Hoenn)",
+            "generation-iv": "4ª Geração (Sinnoh)",
+            "generation-v": "5ª Geração (Unova)",
+            "generation-vi": "6ª Geração (Kalos)",
+            "generation-vii": "7ª Geração (Alola)",
+            "generation-viii": "8ª Geração (Galar)",
+            "generation-ix": "9ª Geração (Paldea)"
+        }
+
+
+        geracaoApi = dadosSpecies["generation"]["name"]
+
+
+        geracao = geracoes.get(geracaoApi, "Desconhecida")
+
+
+        cores = {
+            "yellow": 0xFFFF00,
+            "red": 0xFF0000,
+            "blue": 0x0000FF,
+            "green": 0x00FF00,
+            "black": 0x000000,
+            "brown": 0x8B4513,
+            "purple": 0x800080,
+            "pink": 0xFFC0CB,
+            "white": 0xFFFFFF,
+            "gray": 0x808080
+        }
+
+
+        corPokemon = cores.get(
+            dadosSpecies["color"]["name"],
+            0x2F3136
         )
 
+        
+        embed = discord.Embed(
+            title=nomePokemon,
+            description=f"Informações sobre {nomePokemon}: ",
+            color=corPokemon
+        )
+        
         embed.add_field(
             name="ID",
             value=idPokemon
@@ -66,16 +117,19 @@ class Pokemon(commands.Cog):
             inline=False
         )
 
+        embed.add_field(
+            name="Geração",
+            value=geracao,
+        )
+
         embed.set_thumbnail(
             url=imagem
         )
-
+        
         await interaction.response.send_message(
             embed=embed
         )
-
-        await interaction.response.send_message(f"O nome do pokemon é: {nomePokemon}")
-
+        
 
 async def setup(bot):
     await bot.add_cog(Pokemon(bot))
