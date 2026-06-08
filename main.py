@@ -9,7 +9,6 @@ load_dotenv()
 
 Token = os.getenv("TOKEN")
 
-
 intents = discord.Intents.all()
 bot = commands.Bot(".", intents=intents)
 
