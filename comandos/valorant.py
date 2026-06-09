@@ -1,11 +1,28 @@
 import discord
+import httpx
+import os
+
 from discord import app_commands
 from discord.ext import commands
-import httpx
-
-import os 
+from urllib.parse import quote
 
 
+class ValorantView(discord.ui.View):
+    def __init__(self, nick, tag):
+        super().__init__()
+
+        riot_id = quote(f"{nick}#{tag}")
+
+        tracker_url = f"https://tracker.gg/valorant/profile/riot/{riot_id}/overview"
+
+        self.add_item(
+            discord.ui.Button(
+                label="📊 Ver no Tracker",
+                url=tracker_url
+            )
+        )
+        print("self criada")
+        print(tracker_url)
 
 
 class Valorant(commands.Cog):
@@ -42,7 +59,7 @@ class Valorant(commands.Cog):
 
             if resposta.status_code != 200:
 
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "Nick ou Tag inválidos"
                 )
 
@@ -149,11 +166,14 @@ class Valorant(commands.Cog):
         embed.set_footer(
             text=f"Ultima atualização: {ultimaAtualizacao}"
         )
+        
+        view = ValorantView(nickName, tagName)
 
-    
+        
         await interaction.followup.send(
-            embed=embed
+            embed=embed,
+            view=view
         )
-
+       
 async def setup(bot):
         await bot.add_cog(Valorant(bot))
