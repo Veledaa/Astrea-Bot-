@@ -4,6 +4,19 @@ from discord.ext import commands
 import httpx
 
 
+class PokemonView(discord.ui.View):
+    def __init__(self, nomePokemonView):
+        super().__init__()
+
+        urlPokedex = f"https://pokemondb.net/pokedex/{nomePokemonView.lower()}"
+
+        self.add_item(
+            discord.ui.Button(
+                label="🔴 Veja na Pokedex",
+                url=urlPokedex
+            )
+        )
+
 class Pokemon(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -38,8 +51,8 @@ class Pokemon(commands.Cog):
 
         nomePokemon = dados["name"].title()
         idPokemon = dados["id"]
-        alturaPokemon = dados["height"]
-        pesoPokemon = dados["weight"]
+        alturaPokemon = dados["height"] / 10 #metros
+        pesoPokemon = dados["weight"] / 10 #kg
 
         tipos = [
             tipo["type"]["name"].title()
@@ -103,12 +116,12 @@ class Pokemon(commands.Cog):
 
         embed.add_field(
             name="Altura",
-            value=alturaPokemon
+            value=f"{alturaPokemon} m"
         )
 
         embed.add_field(
             name="Peso",
-            value=pesoPokemon
+            value=f"{pesoPokemon} Kg"
         )
 
         embed.add_field(
@@ -125,9 +138,12 @@ class Pokemon(commands.Cog):
         embed.set_thumbnail(
             url=imagem
         )
+
+        view = PokemonView(nomePokemon)
         
         await interaction.response.send_message(
-            embed=embed
+            embed=embed,
+            view=view
         )
         
 

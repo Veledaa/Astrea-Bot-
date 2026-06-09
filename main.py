@@ -34,11 +34,8 @@ async def main():
     
     async with bot:
 
-
         await carregarCogs()
 
-
         await bot.start(Token)
-
 
 asyncio.run(main())
