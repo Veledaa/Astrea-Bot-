@@ -72,9 +72,40 @@ class LeagueOfLegends(commands.Cog):
                 break
 
         
+        starter_itens = []
+        starter_pick = "?"
+        starter_win = "?"
+
+        for tabela in tabelas:
+
+            caption = tabela.find("caption")
+
+            if caption and caption.text.strip() == "Items Table":
+
+                titulo = tabela.find("thead").find("th")
+
+                if titulo and titulo.text.strip() == "Starter items":
+
+                    primeira_linha = tabela.find("tbody").find("tr")
+
+                    imagens = primeira_linha.find_all("img")
+
+                    starter_itens = [
+                        imagem["alt"]
+                        for imagem in imagens
+                    ]
+
+                    stats = primeira_linha.find_all("strong")
+
+                    starter_pick = stats[0].text
+                    starter_win = stats[1].text
+
+                    break
+
+        
         
         embed = discord.Embed(
-            title=f"Build {champion}",
+            title=f"Build {champion.title()}",
             description="Verificar itens da build:",
         )
 
@@ -85,6 +116,14 @@ class LeagueOfLegends(commands.Cog):
             ),
             inline=False
         )
+
+        embed.add_field(
+            name="🧪 Starter Items",
+            value=(
+                f"{' + '.join(starter_itens)}\n"
+            ),
+            inline=False
+)
 
         await interaction.followup.send(
             embed=embed
