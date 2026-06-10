@@ -21,8 +21,7 @@ class ValorantView(discord.ui.View):
                 url=tracker_url
             )
         )
-        print("self criada")
-        print(tracker_url)
+    
 
 
 class Valorant(commands.Cog):

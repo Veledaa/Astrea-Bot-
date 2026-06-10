@@ -6,7 +6,18 @@ from discord import app_commands
 from discord.ext import commands
 from bs4 import BeautifulSoup
 
+class LeagueOfLegendsView(discord.ui.View):
+    def __init__(self, nome_campeao):
+        super().__init__()
 
+        opgg_url = f"https://op.gg/lol/champions/{nome_campeao.title()}/build"
+
+        self.add_item(
+            discord.ui.Button(
+                label="📘 Ver no OP.GG",
+                url=opgg_url
+            )
+        )
 
 class LeagueOfLegends(commands.Cog):
     def __init__(self, bot):
@@ -21,6 +32,8 @@ class LeagueOfLegends(commands.Cog):
 
 
         url = f"https://op.gg/lol/champions/{champion.lower()}/build"
+        urlIcon = f"https://ddragon.leagueoflegends.com/cdn/15.12.1/img/champion/{champion.title()}.png"
+        urlImagem = f"https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{champion.title()}_0.jpg"
 
         headers = {
             "User-Agent": (
@@ -149,11 +162,23 @@ class LeagueOfLegends(commands.Cog):
 
                 break
 
+
+        
+
         
         
         embed = discord.Embed(
             title=f"Build {champion.title()}",
             description="Verificar itens da build:",
+            color=discord.Color.red()
+        )
+
+        embed.set_image(
+            url=urlImagem
+        )
+
+        embed.set_thumbnail(
+            url=urlIcon
         )
 
         embed.add_field(
@@ -180,8 +205,11 @@ class LeagueOfLegends(commands.Cog):
             inline=False
         )
 
+        view = LeagueOfLegendsView(champion)
+
         await interaction.followup.send(
-            embed=embed
+            embed=embed,
+            view=view
         )
         
 
