@@ -37,7 +37,7 @@ class LeagueOfLegends(commands.Cog):
 
             if resposta.status_code != 200:
                 await interaction.followup.send(
-                    "Não foi possivél obter os itens."
+                    "Nome inválido. Tente novamente."
                 )
 
                 return
@@ -71,6 +71,8 @@ class LeagueOfLegends(commands.Cog):
 
                 break
 
+
+
         
         starter_itens = []
         starter_pick = "?"
@@ -102,6 +104,51 @@ class LeagueOfLegends(commands.Cog):
 
                     break
 
+
+
+        core_build = []
+        melhor_winrate = 0
+        melhor_pickrate = "?"
+
+
+        for tabela in tabelas:
+
+            caption = tabela.find("caption")
+
+            if caption and caption.text.strip() == "Builds Table":
+
+                titulo = tabela.find("thead").find("th").text.strip()
+
+                if titulo == "Core builds":
+
+                    linhas = tabela.find("tbody").find_all("tr")
+
+                for linha in linhas:
+
+                    itens = linha.find_all("img")
+
+                    nomes_itens = [
+                        item["alt"]
+                        for item in itens
+                    ]
+
+                    stats = linha.find_all("strong")
+
+                    pick_rate = stats[0].text
+                    win_rate = stats[1].text
+
+                    win_rate_num = float(
+                        win_rate.replace("%", "")
+                    )
+
+                    if win_rate_num > melhor_winrate:
+
+                        melhor_winrate = win_rate_num
+                        melhor_pickrate = pick_rate
+                        core_build = nomes_itens
+
+                break
+
         
         
         embed = discord.Embed(
@@ -112,7 +159,7 @@ class LeagueOfLegends(commands.Cog):
         embed.add_field(
             name="👢 Bota mais utilizada: \n",
             value=(
-                f"**{bota}**"
+                f"{bota}"
             ),
             inline=False
         )
@@ -123,7 +170,15 @@ class LeagueOfLegends(commands.Cog):
                 f"{' + '.join(starter_itens)}\n"
             ),
             inline=False
-)
+        )
+
+        embed.add_field(
+            name="⚔️ Core Build (Maior Win Rate)",
+            value=(
+                " ➜ ".join(core_build) 
+            ),
+            inline=False
+        )
 
         await interaction.followup.send(
             embed=embed
